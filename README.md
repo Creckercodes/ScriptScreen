@@ -22,3 +22,7 @@ https://github.com/user-attachments/assets/29ba5793-3bd1-4e6d-b4ca-e149222a64bc
 
 https://github.com/user-attachments/assets/d5513ada-90c0-4624-929c-398395544ac5
 
+# Knowen Issues:
+
+cutting off of the hands arms and feet reason being is that its a problem with mediapipe im trying to reslove the issue.
+
