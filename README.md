@@ -16,13 +16,4 @@ Its not perfect the more objects in the veiw and that are closer to you may appe
 
 # Test Videos:
 
-https://github.com/user-attachments/assets/29ba5793-3bd1-4e6d-b4ca-e149222a64bc
-
-
-
-https://github.com/user-attachments/assets/d5513ada-90c0-4624-929c-398395544ac5
-
-# Known Issues:
-
-cutting off of the hands arms and feet reason being is that its a problem with mediapipe im trying to reslove the issue.
-
+https://github.com/user-attachments/assets/e72630a2-fb9e-4801-bc31-61a0539ad914
