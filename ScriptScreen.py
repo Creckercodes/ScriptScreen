@@ -18,9 +18,9 @@ if not cap.isOpened():
     print("Error: Could not open video capture")
     exit()
 
-# Frame size and processing parameters
-FRAME_WIDTH = 1280
-FRAME_HEIGHT = 720
+# Retrieve the width and height of the video capture
+FRAME_WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+FRAME_HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Create a virtual camera
 with pyvirtualcam.Camera(FRAME_WIDTH, FRAME_HEIGHT, fps=30) as virtual_camera:
@@ -46,40 +46,26 @@ with pyvirtualcam.Camera(FRAME_WIDTH, FRAME_HEIGHT, fps=30) as virtual_camera:
 
         if results.segmentation_mask is not None:
             # Create the mask
-            mask = results.segmentation_mask
+            mask = results.segmentation_mask > 0.4  # Adjust threshold if needed
 
-            # Apply a lower threshold to the mask to include more parts of the body
-            condition = mask > 0.3
+            # Convert mask to 3 channels
+            mask_3ch = np.stack((mask,) * 3, axis=-1).astype(np.uint8) * 255
 
-            # Apply morphological operations to clean up the mask
+            # Clean up the mask
             kernel = np.ones((5, 5), np.uint8)
-            condition = cv2.morphologyEx(condition.astype(np.uint8), cv2.MORPH_CLOSE, kernel)
-            condition = cv2.morphologyEx(condition, cv2.MORPH_OPEN, kernel)
+            mask_3ch = cv2.morphologyEx(mask_3ch, cv2.MORPH_CLOSE, kernel)
+            mask_3ch = cv2.morphologyEx(mask_3ch, cv2.MORPH_OPEN, kernel)
 
-            # Refine the mask using erosion and dilation
-            eroded_mask = cv2.erode(condition, kernel, iterations=1)
-            expanded_mask = cv2.dilate(eroded_mask, kernel, iterations=1)
-            
-            # Use contours to refine mask boundaries
-            contours, _ = cv2.findContours(expanded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            if contours:
-                # Get the largest contour
-                largest_contour = max(contours, key=cv2.contourArea)
-                refined_mask = np.zeros_like(expanded_mask)
-                cv2.drawContours(refined_mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
-            else:
-                refined_mask = expanded_mask
-
-            # Smooth the mask using Gaussian blur
-            blurred_mask = cv2.GaussianBlur(refined_mask, (15, 15), 0)
+            # Apply Gaussian blur to the mask to smooth edges
+            blurred_mask = cv2.GaussianBlur(mask_3ch, (15, 15), 0)
             blurred_mask = cv2.threshold(blurred_mask, 127, 255, cv2.THRESH_BINARY)[1]
 
             # Create a green background
             green_background = np.zeros_like(small_frame, dtype=np.uint8)
             green_background[:] = GREEN
 
-            # Combine the frame with the green background using the smoothed mask
-            output_frame = np.where(blurred_mask[:, :, None], small_frame, green_background)
+            # Combine the original frame and the green background using the mask
+            output_frame = np.where(blurred_mask == 255, small_frame, green_background)
 
             # Convert the frame to RGB for pyvirtualcam
             output_frame_rgb = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
