@@ -19,5 +19,4 @@ Its not perfect the more objects in the veiw and that are closer to you may appe
 https://github.com/user-attachments/assets/e72630a2-fb9e-4801-bc31-61a0539ad914
 
 # Known Issues:
-Hand and feet detection issues where the hands and feet arent being added to the mask well. Reason being: Its Mediapipe, Mediapipe had been knowen to have detection issues with hands and feet espeically when they are closer to the outside of the frame.
-Im not sure how to reslove this.
+Traking dots not meshing together to make a smooth mask
